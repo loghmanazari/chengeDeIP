@@ -1,9 +1,13 @@
 #!/bin/bash
 
-read -rp "New listen_ip: " NEW_IP
+while true; do
+    read -rp "Enter new listen_ip: " NEW_IP
+    [[ -n "$NEW_IP" ]] && break
+    echo "listen_ip cannot be empty!"
+done
 
 for file in /root/backhaul-core/*.toml; do
-    [ -f "$file" ] || continue
+    [[ -f "$file" ]] || continue
 
     name=$(basename "$file" .toml)
 
