@@ -1,10 +1,25 @@
 #!/bin/bash
 
 while true; do
-    read -rp "Mode (iran/kharej): " MODE
-    case "$MODE" in
-        iran|kharej) break ;;
-        *) echo "Please enter 'iran' or 'kharej'." ;;
+    echo "Select mode:"
+    echo "1) Iran (change dst_ip)"
+    echo "2) Kharej (change listen_ip)"
+    read -rp "Choice [1-2]: " CHOICE
+
+    case "$CHOICE" in
+        1)
+            MODE="iran"
+            KEY="dst_ip"
+            break
+            ;;
+        2)
+            MODE="kharej"
+            KEY="listen_ip"
+            break
+            ;;
+        *)
+            echo "Please enter 1 or 2."
+            ;;
     esac
 done
 
@@ -13,9 +28,6 @@ while true; do
     [[ -n "$NEW_IP" ]] && break
     echo "IP cannot be empty!"
 done
-
-KEY="listen_ip"
-[[ "$MODE" == "iran" ]] && KEY="dst_ip"
 
 PROFILE=""
 
@@ -30,10 +42,7 @@ for file in /root/backhaul-core/*.toml; do
 
     sed -i -E "s|^([[:space:]]*${KEY}[[:space:]]*=[[:space:]]*\").*(\")|\1${NEW_IP}\2|" "$file"
 
-    # فقط از اولین فایل مقدار profile را می‌خوانیم
-    if [[ -z "$PROFILE" ]]; then
-        PROFILE=$(grep -m1 '^profile[[:space:]]*=' "$file" | cut -d'"' -f2)
-    fi
+    [[ -z "$PROFILE" ]] && PROFILE=$(grep -m1 '^profile[[:space:]]*=' "$file" | cut -d'"' -f2)
 
     service="backhaul-${name}"
 
@@ -50,7 +59,7 @@ for file in /root/backhaul-core/*.toml; do
 done
 
 echo "================================"
+echo "Mode    : $MODE"
 echo "Profile : ${PROFILE:-Unknown}"
 echo "New IP  : $NEW_IP"
-echo "Mode    : $MODE"
 echo "Done."
